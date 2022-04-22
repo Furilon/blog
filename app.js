@@ -6,10 +6,12 @@ const logger = require('morgan');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const passport = require('passport');
-const cors = require('cors')
+const cors = require('cors');
+const compression = require('compression');
+const helmet = require('helmet');
 require('dotenv').config();
 
-const authRouter = require('./routes/auth')
+const authRouter = require('./routes/auth');
 const blogRouter = require('./routes/blog');
 const adminRouter = require('./routes/admin');
 
@@ -25,26 +27,32 @@ db.on('error', console.error.bind(console, 'Mongo connection error.'));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-app.use(cors())
+app.use(cors());
+app.use(helmet());
+app.use(compression());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/login', authRouter)
+app.use('/login', authRouter);
 app.use('/posts', blogRouter);
-app.use('/admin', passport.authenticate("jwt", {session: false}), adminRouter);
+app.use(
+    '/admin',
+    passport.authenticate('jwt', { session: false }),
+    adminRouter
+);
 
-app.get('/', function(req, res) {
-  res.redirect('/posts')
-})
-app.get('/post_form', function(req, res) {
-  res.render('post_form')
-})
+app.get('/', function (req, res) {
+    res.redirect('/posts');
+});
+app.get('/post_form', function (req, res) {
+    res.render('post_form');
+});
 app.get('/put_form', function (req, res) {
-  res.render('put_form')
-})
+    res.render('put_form');
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
