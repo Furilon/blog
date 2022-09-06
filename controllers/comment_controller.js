@@ -1,10 +1,11 @@
 const Comment = require('../models/comment')
-const { body, validationResult } = require('express-validator')
+const { body, validationResult } = require('express-validator');
 
 exports.comment_post = [
-    body('name').exists().withMessage("Name must be filled out.").trim().escape(),
-    body('content').exists().withMessage("Content must be filled.").trim().escape(),
+    body('name').trim().escape(),
+    body('content').trim().escape(),
     (req, res, next) => {
+        console.log(req.body.name, req.body.content)
         const errors = validationResult(req);
         const commentDetails = {
             name: req.body.name,
@@ -18,8 +19,8 @@ exports.comment_post = [
                 name: req.body.name,
                 content: req.body.content,
             }
-            res.status(400).json(data);
-            return;
+            return res.json(data);
+            
         }
         const comment = new Comment(commentDetails)
         comment.save(function(err) {
@@ -27,16 +28,20 @@ exports.comment_post = [
                 next(err)
             }
             console.log("New comment: " + comment._id)
-            res.status(201).json(comment._id)
+            return res.json(comment._id);
         })
     }
 ]
 
 exports.comment_delete = function(req, res, next) {
-    Comment.findByIdAndDelete(req.params.commentId, function(err) {
-        if (err) {
-            return next(err)
-        }
-        res.status(201).json(req.params.commentId)
-    })
+    if (req.isAuthenticated()) {
+        Comment.findByIdAndDelete(req.params.commentId, function(err) {
+            if (err) {
+                return next(err)
+            }
+            res.status(201).json(req.params.commentId)
+        })
+    } else {
+        res.status(400).send("You're not authenticated.")
+    }
 }

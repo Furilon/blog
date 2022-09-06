@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const cors = require('cors')
+const cors = require('cors');
 const blog_controller = require('../controllers/blog_controller');
 const comment_controller = require('../controllers/comment_controller');
-const passport = require('passport')
 // RESTish API:
 
 // I have a blog, the DB model consists of blogposts
@@ -17,33 +16,29 @@ const passport = require('passport')
 // (Reading doesn't make sense because they will be
 //  supplied with the post.)
 
-router.options('*', cors())
+router.options('*', cors());
 
 // POSTS ROUTERS
 /* READ posts. */
 router.get('/', blog_controller.posts_get);
 
 /* CREATE a post. */
-router.post('/', cors(), passport.authenticate('jwt', { session: false }), blog_controller.posts_post);
+router.post('/', blog_controller.posts_post);
 
 /* READ a post */
-router.get('/:postId', blog_controller.one_post_get)
+router.get('/:postId', blog_controller.one_post_get);
 
 /* UPDATE a post. */
-router.put('/:postId', cors(), passport.authenticate('jwt', { session: false }), blog_controller.posts_put);
+router.put('/:postId', blog_controller.posts_put);
 
 /* DELETE a post. */
-router.delete('/:postId', passport.authenticate('jwt', { session: false }), blog_controller.posts_delete);
+router.delete('/:postId', blog_controller.posts_delete);
 
 // COMMENTS ROUTERS
 // CREATE a comment
-router.post('/:postId/comment', cors(), comment_controller.comment_post);
+router.post('/:postId/comment', comment_controller.comment_post);
 
 // DELETE a comment
-router.delete(
-    '/:postId/comment/:commentId',
-    passport.authenticate('jwt', { session: false }),
-    comment_controller.comment_delete
-);
+router.delete('/:postId/comment/:commentId', comment_controller.comment_delete);
 
 module.exports = router;
