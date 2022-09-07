@@ -88,7 +88,7 @@ exports.posts_put = [
     (req, res, next) => {
         const errors = validationResult(req);
         const post = new Blogpost({
-            id: req.params.id,
+            _id: req.params.id,
             title: req.body.title,
             content: req.body.content,
             timestamp: Date.now(),
